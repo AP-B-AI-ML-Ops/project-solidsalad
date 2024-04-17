@@ -27,7 +27,8 @@ The **Mental Health Predictor** program aims to utilize a Kaggle Mental Health D
 
 By analyzing these properties, the program aims to provide insights into an individual's mental well-being and offer potential predictions to aid in early intervention or support. This can be particularly useful in identifying individuals who may benefit from mental health resources or interventions, thereby contributing to improved overall mental health outcomes. My goal is for my service to be used to gauge wether or not you need to contact a professional for further analysis, or if you're probably just fine.
 
-disclaimer: the AI is never 100% correct and should not be as a replacement for actual professionals, but moreso a tool to estimate your mental health before taking further action.
+[!CAUTION]
+***It is important to remember that the AI is never 100% correct and should not be used as a replacement for actual professionals, but rather as a tool to estimate your mental health before taking further action.***
 
 ## Flows & Actions
 Like most AI projects my program will consist of several flows:
