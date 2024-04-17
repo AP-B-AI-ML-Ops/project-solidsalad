@@ -1,12 +1,12 @@
 # README
 # Dataset
-For this project i will use 'Mental Health Dataset' from kaggle.  
+For this project i will use the [Kaggle Mental Health Dataset](https://www.kaggle.com/datasets/bhavikjikadara/mental-health-dataset).  
 Because the dataset is pretty large, i will split the dataset in a train and test dataset as is the norm with most AI projects. Validation will simply be done with cross-validation.  
 New data for use in the service will come from the user's own answers in a google forum.
 
 ## Purpose
 
-The **Mental Health Predictor** program aims to utilize a Kaggle Mental Health Dataset to train an AI model capable of predicting an individual's mental health status based on a set of 17 properties:
+The program aims to train an AI model capable of predicting an individual's mental health status based on a set of **17** properties:
 
 1. Timestamp
 2. Gender
