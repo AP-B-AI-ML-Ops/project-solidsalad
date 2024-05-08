@@ -17,7 +17,7 @@ def main_flow():
     
     mlflow.set_tracking_uri("sqlite:///mlflow.db")
 
-    collect_flow("./data/")
+    collect_flow("./data/", False)
     prep_flow("./data/", "./models/")
 
     train_flow("./models/")
