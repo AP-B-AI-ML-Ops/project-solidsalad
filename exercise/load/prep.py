@@ -4,7 +4,9 @@ import pandas as pd
 
 from prefect import flow, task
 
+from sklearn.calibration import LabelEncoder
 from sklearn.feature_extraction import DictVectorizer
+from sklearn.model_selection import train_test_split
 
 @task
 def dump_pickle(obj, filename: str):
@@ -14,25 +16,42 @@ def dump_pickle(obj, filename: str):
 @task
 def read_dataframe(filename: str):
     df = pd.read_csv(filename)
+    return df
 
-    df['tpep_dropoff_datetime'] = pd.to_datetime(df['tpep_dropoff_datetime'])
-    df['tpep_pickup_datetime'] = pd.to_datetime(df['tpep_pickup_datetime'])
-
-    df['duration'] = df['tpep_dropoff_datetime'] - df['tpep_pickup_datetime']
-    df.duration = df.duration.apply(lambda td: td.total_seconds() / 60)
-    df = df[(df.duration >= 1) & (df.duration <= 60)]
-
-    categorical = ['pulocationid', 'dolocationid']
-    df[categorical] = df[categorical].astype(str)
-
+@task
+def drop_na(df):
+    df.dropna(inplace = True)
     return df
 
 @task
 def preprocess(df: pd.DataFrame, dv: DictVectorizer, fit_dv: bool = False):
-    df['PU_DO'] = df['pulocationid'] + '_' + df['dolocationid']
-    categorical = ['PU_DO']
-    numerical = ['trip_distance']
-    dicts = df[categorical + numerical].to_dict(orient='records')
+    #dropping timestamp column
+    df.drop(columns = "Timestamp", inplace = True)
+
+    binary_categorical_cols = ['Gender', 'family_history', 'treatment', 'Coping_Struggles']
+    three_option_categorical_cols = ['self_employed', 'Growing_Stress', 'Changes_Habits', 'Mental_Health_History', 
+                                      'Work_Interest', 'Social_Weakness', 'mental_health_interview', 'care_options']
+    
+    days_mapping = {'Go out Every day': 0, '1-14 days': 1, '15-30 days': 2, '31-60 days': 3, 'More than 2 months': 4}
+    mood_mapping = {'Low': 0, 'Medium': 1, 'High': 2}
+    
+    #categorical mapping
+    for col in binary_categorical_cols:
+        df[col] = df[col].map({'Female': 0, 'Male': 1, 'No': 0, 'Yes': 1})
+        
+    for col in three_option_categorical_cols:
+        df[col] = df[col].map({'No': 0, 'Maybe': 1, 'Yes': 2, 'nan': -1, 'Not sure': 1})
+    
+    df['Days_Indoors'] = df['Days_Indoors'].map(days_mapping)
+    df['Mood_Swings'] = df['Mood_Swings'].map(mood_mapping)
+
+    #encoding remaining labels
+    label_encoder = LabelEncoder()
+    encoded_df = df.apply(label_encoder.fit_transform)
+    
+    # Combine categorical and numerical columns into dictionaries
+    dicts = encoded_df.to_dict(orient='records')
+    
     if fit_dv:
         X = dv.fit_transform(dicts)
     else:
@@ -42,28 +61,19 @@ def preprocess(df: pd.DataFrame, dv: DictVectorizer, fit_dv: bool = False):
 
 @flow
 def prep_flow(data_path: str, dest_path: str):
-    # Load parquet files
-    df_train = read_dataframe(
-        os.path.join(data_path, "yellow-2021-01.csv")
-    )
-    df_val = read_dataframe(
-        os.path.join(data_path, "yellow-2021-02.csv")
-    )
-    df_test = read_dataframe(
-        os.path.join(data_path, "yellow-2021-03.csv")
+    df = read_dataframe(
+        os.path.join(data_path, "Mental Health Dataset.csv")
     )
 
     # Extract the target
-    target = 'tip_amount'
-    y_train = df_train[target].values
-    y_val = df_val[target].values
-    y_test = df_test[target].values
+    target = 'Mood_Swings'
+    y = df[target].values
 
     # Fit the DictVectorizer and preprocess data
     dv = DictVectorizer()
-    X_train, dv = preprocess(df_train, dv, fit_dv=True)
-    X_val, _ = preprocess(df_val, dv, fit_dv=False)
-    X_test, _ = preprocess(df_test, dv, fit_dv=False)
+    X, dv = preprocess(df, dv, fit_dv=True)
+
+    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size = 0.2, random_state = 42)
 
     # Create dest_path folder unless it already exists
     os.makedirs(dest_path, exist_ok=True)
@@ -71,5 +81,4 @@ def prep_flow(data_path: str, dest_path: str):
     # Save DictVectorizer and datasets
     dump_pickle(dv, os.path.join(dest_path, "dv.pkl"))
     dump_pickle((X_train, y_train), os.path.join(dest_path, "train.pkl"))
-    dump_pickle((X_val, y_val), os.path.join(dest_path, "val.pkl"))
     dump_pickle((X_test, y_test), os.path.join(dest_path, "test.pkl"))

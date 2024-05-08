@@ -135,3 +135,4 @@ webencodings==0.5.1
 Werkzeug==3.0.1
 wrapt==1.14.1
 kaggle==1.6.12
+prefect==2.18.3
