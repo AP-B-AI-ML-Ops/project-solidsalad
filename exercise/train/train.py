@@ -17,8 +17,8 @@ def start_ml_experiment(X_train, y_train):
         rf.fit(X_train, y_train)
 
 @flow
-def train_flow(model_path: str):
-    mlflow.set_experiment("random-forest-train")
+def train_flow(model_path: str, experiment_name: str):
+    mlflow.set_experiment(experiment_name)
     mlflow.sklearn.autolog()
     
     X_train, y_train = load_pickle(os.path.join(model_path, "train.pkl"))

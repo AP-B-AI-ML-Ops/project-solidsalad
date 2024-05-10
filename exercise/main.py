@@ -8,8 +8,9 @@ from train.register import register_flow
 
 import mlflow
 
-HPO_EXPERIMENT_NAME = "random-forest-hyperopt"
-REG_EXPERIMENT_NAME = "random-forest-best-models"
+TRN_EXPERIMENT_NAME = "project_random-forest-train"
+HPO_EXPERIMENT_NAME = "project_random-forest-hyperopt"
+REG_EXPERIMENT_NAME = "project_random-forest-best-models"
 
 @flow
 def main_flow():
@@ -20,7 +21,7 @@ def main_flow():
     collect_flow("./data/", False)
     prep_flow("./data/", "./models/")
 
-    train_flow("./models/")
+    train_flow("./models/", TRN_EXPERIMENT_NAME)
     hpo_flow("./models/", 5, HPO_EXPERIMENT_NAME)
     register_flow("./models/", 5, REG_EXPERIMENT_NAME, HPO_EXPERIMENT_NAME)
 

@@ -24,9 +24,12 @@ def drop_na(df):
     return df
 
 @task
-def preprocess(df: pd.DataFrame, dv: DictVectorizer, fit_dv: bool = False):
+def preprocess(y_col, df: pd.DataFrame, dv: DictVectorizer, fit_dv: bool = False):
     #dropping timestamp column
     df.drop(columns = "Timestamp", inplace = True)
+
+    #dropping y column
+    df.drop(columns = y_col, inplace = True)
 
     #defining categories for mapping
     binary_categorical_cols = ['Gender', 'family_history', 'treatment', 'Coping_Struggles']
@@ -34,7 +37,6 @@ def preprocess(df: pd.DataFrame, dv: DictVectorizer, fit_dv: bool = False):
                                       'Work_Interest', 'Social_Weakness', 'mental_health_interview', 'care_options']
     
     days_mapping = {'Go out Every day': 0, '1-14 days': 1, '15-30 days': 2, '31-60 days': 3, 'More than 2 months': 4}
-    mood_mapping = {'Low': 0, 'Medium': 1, 'High': 2}
     
     #categorical mapping
     for col in binary_categorical_cols:
@@ -44,7 +46,6 @@ def preprocess(df: pd.DataFrame, dv: DictVectorizer, fit_dv: bool = False):
         df[col] = df[col].map({'No': 0, 'Maybe': 1, 'Yes': 2, 'nan': -1, 'Not sure': 1})
     
     df['Days_Indoors'] = df['Days_Indoors'].map(days_mapping)
-    df['Mood_Swings'] = df['Mood_Swings'].map(mood_mapping)
 
     #encoding remaining labels
     label_encoder = LabelEncoder()
@@ -66,13 +67,16 @@ def prep_flow(data_path: str, dest_path: str):
         os.path.join(data_path, "Mental Health Dataset.csv")
     )
 
+    #dropping n/a
+    df = drop_na(df)
+
     # Extract the target
     target = 'Mood_Swings'
     y = df[target].values
 
     # Fit the DictVectorizer and preprocess data
     dv = DictVectorizer()
-    X, dv = preprocess(df, dv, fit_dv=True)
+    X, dv = preprocess(target, df, dv, fit_dv=True)
 
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size = 0.2, random_state = 42)
 
