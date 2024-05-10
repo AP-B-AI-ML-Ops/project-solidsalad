@@ -4,5 +4,6 @@ mlartifacts/
 # *.bin
 # models/
 *.pkl
+data/
 test.py
 __pycache__/
