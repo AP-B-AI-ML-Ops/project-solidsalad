@@ -6,8 +6,8 @@ import optuna
 from prefect import task, flow
 
 from optuna.samplers import TPESampler
-from sklearn.ensemble import RandomForestRegressor
-from sklearn.metrics import mean_squared_error
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.metrics import accuracy_score
 
 @task
 def load_pickle(filename):
@@ -15,7 +15,7 @@ def load_pickle(filename):
         return pickle.load(f_in)
 
 @task
-def optimize(X_train, y_train, X_val, y_val, num_trials):
+def optimize(X_train, y_train, X_test, y_test, num_trials):
     def objective(trial):
         params = {
             'n_estimators': trial.suggest_int('n_estimators', 10, 50, 1),
@@ -27,16 +27,16 @@ def optimize(X_train, y_train, X_val, y_val, num_trials):
         }
         with mlflow.start_run():
             mlflow.log_params(params)
-            rf = RandomForestRegressor(**params)
+            rf = RandomForestClassifier(**params)
             rf.fit(X_train, y_train)
-            y_pred = rf.predict(X_val)
-            rmse = mean_squared_error(y_val, y_pred, squared=False)
-            mlflow.log_metric("rmse", rmse)
+            y_pred = rf.predict(X_test)
+            accuracy = accuracy_score(y_test, y_pred)
+            mlflow.log_metric("accuracy", accuracy)
 
-        return rmse
+        return accuracy
 
     sampler = TPESampler(seed=42)
-    study = optuna.create_study(direction="minimize", sampler=sampler)
+    study = optuna.create_study(direction="maximize", sampler=sampler)
     study.optimize(objective, n_trials=num_trials)
 
 
@@ -47,6 +47,6 @@ def hpo_flow(model_path: str, num_trials: int, experiment_name: str):
     mlflow.sklearn.autolog(disable=True)
 
     X_train, y_train = load_pickle(os.path.join(model_path, "train.pkl"))
-    X_val, y_val = load_pickle(os.path.join(model_path, "val.pkl"))
+    X_test, y_test = load_pickle(os.path.join(model_path, "test.pkl"))
 
-    optimize(X_train, y_train, X_val, y_val, num_trials)
+    optimize(X_train, y_train, X_test, y_test, num_trials)

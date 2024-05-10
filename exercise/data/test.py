@@ -59,6 +59,7 @@ for col in three_option_categorical_cols:
 
 df['Days_Indoors'] = df['Days_Indoors'].map(days_mapping)
 df['Mood_Swings'] = df['Mood_Swings'].map(mood_mapping)
+
 #encoding remaining labels
 label_encoder = LabelEncoder()
 encoded_df = df.apply(label_encoder.fit_transform)

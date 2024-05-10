@@ -136,3 +136,5 @@ Werkzeug==3.0.1
 wrapt==1.14.1
 kaggle==1.6.12
 prefect==2.18.3
+mlflow==2.12.2
+optuna==3.6.1

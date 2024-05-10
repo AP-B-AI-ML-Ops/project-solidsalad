@@ -3,7 +3,7 @@ import pickle
 import mlflow
 from prefect import task, flow
 
-from sklearn.ensemble import RandomForestRegressor
+from sklearn.ensemble import RandomForestClassifier
 
 @task
 def load_pickle(filename: str):
@@ -13,7 +13,7 @@ def load_pickle(filename: str):
 @task
 def start_ml_experiment(X_train, y_train):
     with mlflow.start_run():
-        rf = RandomForestRegressor(max_depth=10, random_state=0)
+        rf = RandomForestClassifier(max_depth=10, random_state=0)
         rf.fit(X_train, y_train)
 
 @flow

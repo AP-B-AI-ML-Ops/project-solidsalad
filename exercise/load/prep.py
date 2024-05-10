@@ -28,6 +28,7 @@ def preprocess(df: pd.DataFrame, dv: DictVectorizer, fit_dv: bool = False):
     #dropping timestamp column
     df.drop(columns = "Timestamp", inplace = True)
 
+    #defining categories for mapping
     binary_categorical_cols = ['Gender', 'family_history', 'treatment', 'Coping_Struggles']
     three_option_categorical_cols = ['self_employed', 'Growing_Stress', 'Changes_Habits', 'Mental_Health_History', 
                                       'Work_Interest', 'Social_Weakness', 'mental_health_interview', 'care_options']
