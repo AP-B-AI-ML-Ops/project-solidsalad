@@ -2,10 +2,8 @@
 // README at: https://github.com/devcontainers/templates/tree/main/src/anaconda
 {
 	"name": "Anaconda (Python 3)",
-	"build": { 
-		"context": "..",
-		"dockerfile": "Dockerfile"
-	},
+	"dockerComposeFile": "docker-compose.yml",
+	"service": "app",
 	"features": {
 		"ghcr.io/devcontainers/features/conda:1": {},
 		"ghcr.io/devcontainers/features/docker-in-docker:2": {}
