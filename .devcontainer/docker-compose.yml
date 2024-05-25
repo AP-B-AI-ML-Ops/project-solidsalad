@@ -20,6 +20,7 @@ services:
       - grafana-data-config-datasources:/workspaces/project-solidsalad/.grafana/datasources
       - grafana-data-config-dashboards:/workspaces/project-solidsalad/.grafana/dashboards
       - grafana-data-dashboards:/workspaces/project-solidsalad/dashboards
+      - ../:/workspaces/project-solidsalad
     network_mode: service:db
     command: sleep infinity
 

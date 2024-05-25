@@ -4,6 +4,7 @@
 	"name": "Anaconda (Python 3)",
 	"dockerComposeFile": "docker-compose.yml",
 	"service": "app",
+	"workspaceFolder": "/workspaces/${localWorkspaceFolderBasename}",
 	"features": {
 		"ghcr.io/devcontainers/features/conda:1": {},
 		"ghcr.io/devcontainers/features/docker-in-docker:2": {}
