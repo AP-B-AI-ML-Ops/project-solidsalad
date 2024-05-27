@@ -9,3 +9,4 @@ data/
 test.py
 __pycache__/
 kaggle.json
+*.old*
