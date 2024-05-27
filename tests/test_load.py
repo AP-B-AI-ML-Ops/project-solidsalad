@@ -7,7 +7,7 @@ def test_generate_query_params():
     expected = {
         "$$app_token": "test",
         "$where": "tpep_pickup_datetime between '2021-01-01T00:00:00' and '2021-02-01T00:00:00'",
-        "$limit": 10
+        "$limit": 10,
     }
 
     assert actual == expected

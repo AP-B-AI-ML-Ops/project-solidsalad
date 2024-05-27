@@ -9,6 +9,7 @@ from sklearn.metrics import accuracy_score
 
 from prefect import task, flow
 
+
 @task
 def load_pickle(filename):
     with open(filename, "rb") as f_in:
@@ -17,7 +18,14 @@ def load_pickle(filename):
 
 @task
 def train_and_log_model(X_train, y_train, X_test, y_test, params):
-    RF_PARAMS = ['max_depth', 'n_estimators', 'min_samples_split', 'min_samples_leaf', 'random_state', 'n_jobs']
+    RF_PARAMS = [
+        "max_depth",
+        "n_estimators",
+        "min_samples_split",
+        "min_samples_leaf",
+        "random_state",
+        "n_jobs",
+    ]
 
     with mlflow.start_run():
         for param in RF_PARAMS:
@@ -30,6 +38,7 @@ def train_and_log_model(X_train, y_train, X_test, y_test, params):
         test_accuracy = accuracy_score(y_test, rf.predict(X_test))
         mlflow.log_metric("test_accuracy", test_accuracy)
 
+
 @task
 def get_experiment_runs(top_n, hpo_experiment_name):
     client = MlflowClient()
@@ -38,9 +47,10 @@ def get_experiment_runs(top_n, hpo_experiment_name):
         experiment_ids=experiment.experiment_id,
         run_view_type=ViewType.ACTIVE_ONLY,
         max_results=top_n,
-        order_by=["metrics.accuracy ASC"]
+        order_by=["metrics.accuracy ASC"],
     )
     return runs
+
 
 @task
 def select_best_model(top_n, experiment_name):
@@ -50,16 +60,19 @@ def select_best_model(top_n, experiment_name):
         experiment_ids=experiment.experiment_id,
         run_view_type=ViewType.ACTIVE_ONLY,
         max_results=top_n,
-        order_by=["metrics.test_accuracy DESC"]
+        order_by=["metrics.test_accuracy DESC"],
     )[0]
-    
+
     return best_run
 
+
 @flow
-def register_flow(model_path: str, top_n: int, experiment_name: str, hpo_experiment_name: str):
+def register_flow(
+    model_path: str, top_n: int, experiment_name: str, hpo_experiment_name: str
+):
     mlflow.set_experiment(experiment_name)
     mlflow.sklearn.autolog()
-    
+
     X_train, y_train = load_pickle(os.path.join(model_path, "train.pkl"))
     X_test, y_test = load_pickle(os.path.join(model_path, "test.pkl"))
 
