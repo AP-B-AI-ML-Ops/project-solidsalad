@@ -1,15 +1,16 @@
 import datetime
 import time
-from dotenv import load_dotenv
 import os
 import pickle
 import pandas as pd
+import psycopg
 from evidently.report import Report
 from evidently.metrics import DatasetDriftMetric
 from evidently.metrics import DatasetMissingValuesMetric
 from evidently import ColumnMapping
 from sklearn.preprocessing import LabelEncoder
-import psycopg
+from dotenv import load_dotenv
+
 
 load_dotenv()
 
